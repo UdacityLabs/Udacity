@@ -7,7 +7,7 @@ Start-Transcript -Path C:\WindowsAzure\Logs\CloudLabsCustomScriptExtension.txt -
 
 $path = pwd
 $path=$path.Path
-$commonscriptpath = "$path" + "\Udacity/main/CloudArchitect/Course3/Project/rg-hrlegal/psscripts.ps1"
+$commonscriptpath = "$path" + "\Udacity\main\CloudArchitect\Course3\Project\rg-hrlegal\psscripts.ps1"
 . $commonscriptpath
 
 #Importing functions
