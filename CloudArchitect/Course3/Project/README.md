@@ -21,7 +21,7 @@ Download the files "deploy-02.json" and "deploy-02.parameters.json" available in
 Create a resource group with name rg-data.
 
 **c) Deploy:** <br/>
-Deploy the files in Azure after providing the UniqueID value.
+Deploy the files to rg-data resource group after providing the UniqueID value.
 
 ![UniqueID Details](./media/provide-uniqueid.jpg)
 
@@ -36,7 +36,7 @@ Download the files "deploy-04.json" and "deploy-04.parameters.json" available in
 Create a resource group with name rg-devdata.
 
 **c) Deploy:** <br/>
-Deploy the files in Azure after providing the UniqueID value just as you did in the previous step.
+Deploy the files to rg-devdata resource group after providing the UniqueID value just as you did in the previous step.
 
 ------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ Download the files "deploy-vnetcore.json" available in the path "Udacity/CloudAr
 Create a resource group with name rg-core.
 
 **c) Deploy:** <br/>
-Deploy the file in Azure. It is not required to provide UniqueID value to this file.
+Deploy the file to rg-core resource group. It is not required to provide UniqueID value to this file.
 
 ------------------------------------------------------------------
 
@@ -62,6 +62,19 @@ Download the files "deploy-vnetprod.json" available in the path "Udacity/CloudAr
 Create a resource group with name rg-prod.
 
 **c) Deploy:** <br/>
-Deploy the file in Azure. It is not required to provide UniqueID value to this file.
+Deploy the file to rg-prod resource group. It is not required to provide UniqueID value to this file.
+
+------------------------------------------------------------------
+
+### 5. Deploy to Resource Group: rg-hrlegal
+
+**a) Files to download:** <br/>
+Download the files "deploy-01.json" and "deploy-01.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-hrlegal/".
+
+**b) Create Resource Group:** <br/>
+Create a resource group with name rg-hrlegal.
+
+**c) Deploy:** <br/>
+Deploy the file to rg-hrlegal resource group by providing the AzureUserName, AzurePassword and UniqueID.
 
 ------------------------------------------------------------------
