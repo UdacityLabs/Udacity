@@ -6,6 +6,6 @@
 
 ## Deployment
 
-### Deploy 01 Resource Group: rg-data
+### 1. Deploy to Resource Group: rg-data
 
 
