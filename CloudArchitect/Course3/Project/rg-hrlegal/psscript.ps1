@@ -1,14 +1,7 @@
 
-Start-Transcript -Path C:\WindowsAzure\Logs\CloudLabsCustomScriptExtension.txt -Append
+Start-Transcript -Path C:\WindowsAzure\Logs\UdacityCustomScriptExtension.txt -Append
 [Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls" 
-
-
-
-$path = pwd
-$path=$path.Path
-$commonscriptpath = "$path" + "\Udacity\main\CloudArchitect\Course3\Project\rg-hrlegal\psscripts.ps1"
-. $commonscriptpath
 
 #Importing functions
 Disable-InternetExplorerESC
