@@ -4,7 +4,7 @@
 
 1. Consider an alphanumeric string of 6 values starting with an alphabet in lowercase, that you need to use as **UniqueID** for the rest of the lab. For example: **a14d6e**.
 
-2. Deploy all the resources in the same region
+2. Create/Ddeploy all the resource groups and resources in the same region
 
 3. Select the region only in the **Region** property. Do not make any modifications to **Location** property "[resourceGroup().location]". 
 
@@ -17,7 +17,10 @@
 **a) Files to download:** <br/>
 Download the files "deploy-02.json" and "deploy-02.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-data/".
 
-**b) Deploy:** <br/>
+**b) Create Resource Group:** <br/>
+Create a resource group with name rg-data.
+
+**c) Deploy:** <br/>
 Deploy the files in Azure after providing the UniqueID value.
 
 ![UniqueID Details](./media/provide-uniqueid.jpg)
@@ -29,7 +32,10 @@ Deploy the files in Azure after providing the UniqueID value.
 **a) Files to download:** <br/>
 Download the files "deploy-04.json" and "deploy-04.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-devdata/".
 
-**b) Deploy:** <br/>
+**b) Create Resource Group:** <br/>
+Create a resource group with name rg-devdata.
+
+**c) Deploy:** <br/>
 Deploy the files in Azure after providing the UniqueID value just as you did in the previous step.
 
 ------------------------------------------------------------------
@@ -39,17 +45,23 @@ Deploy the files in Azure after providing the UniqueID value just as you did in 
 **a) Files to download:** <br/>
 Download the files "deploy-vnetcore.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-core/".
 
-**b) Deploy:** <br/>
+**b) Create Resource Group:** <br/>
+Create a resource group with name rg-core.
+
+**c) Deploy:** <br/>
 Deploy the file in Azure. It is not required to provide UniqueID value to this file.
 
 ------------------------------------------------------------------
 
-### 4. Deploy to Resource Group: rg-core
+### 4. Deploy to Resource Group: rg-prod
 
 **a) Files to download:** <br/>
 Download the files "deploy-vnetprod.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-prod/".
 
-**b) Deploy:** <br/>
+**b) Create Resource Group:** <br/>
+Create a resource group with name rg-prod.
+
+**c) Deploy:** <br/>
 Deploy the file in Azure. It is not required to provide UniqueID value to this file.
 
 ------------------------------------------------------------------
