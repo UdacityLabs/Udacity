@@ -15,9 +15,23 @@
 ### 1. Deploy to Resource Group: rg-data
 
 **a) Files to download:** <br/>
-Download the files "deploy-02.json" and "deploy-02.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-data".
+Download the files "deploy-02.json" and "deploy-02.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-data/".
 
 **b) Deploy:** <br/>
 Deploy the files in Azure after providing the UniqueID value.
 
 ![UniqueID Details](./media/provide-uniqueid.jpg)
+
+------------------------------------------------------------------
+
+### 2. Deploy to Resource Group: rg-devdata
+
+**a) Files to download:** <br/>
+Download the files "deploy-04.json" and "deploy-04.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-devdata/".
+
+**b) Deploy:** <br/>
+Deploy the files in Azure after providing the UniqueID value just as you did in the previous step.
+
+------------------------------------------------------------------
+
+
