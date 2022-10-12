@@ -4,6 +4,8 @@
 
 1. Consider an alphanumeric string of 6 values starting with an alphabet in lowercase, that you need to use as **UniqueID** for the rest of the lab. For example: **a14d6e**.
 
+2. Note: Deploy all the resources in the same region
+
 ## Deployment Guide
 
 ### 1. Deploy to Resource Group: rg-data
