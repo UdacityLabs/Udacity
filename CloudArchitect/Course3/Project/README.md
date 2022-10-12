@@ -19,3 +19,5 @@ Download the files "deploy-02.json" and "deploy-02.parameters.json" available in
 
 **b) Deploy:** <br/>
 Deploy the files in Azure after providing the UniqueID value.
+
+![UniqueID Details](./media/provide-uniqueid.jpg)
