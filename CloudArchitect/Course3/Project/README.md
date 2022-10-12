@@ -78,3 +78,16 @@ Create a resource group with name rg-hrlegal.
 Deploy the file to rg-hrlegal resource group by providing the AzureUserName, AzurePassword and UniqueID.
 
 ------------------------------------------------------------------
+
+### 6. Deploy to Resource Group: rg-operations
+
+**a) Files to download:** <br/>
+Download the files "deploy-07.json" and "deploy-07.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-operations/".
+
+**b) Create Resource Group:** <br/>
+Create a resource group with name rg-operations.
+
+**c) Deploy:** <br/>
+Deploy the file to rg-operations resource group by providing the AzureUserName, AzurePassword and UniqueID.
+
+------------------------------------------------------------------
