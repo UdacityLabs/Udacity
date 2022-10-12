@@ -1,10 +1,14 @@
 # Cloud Architect Nanodegree Course 3 Project
 
-## Before you start (Pre-requisites)
+## Before you start (Pre-requisites & Points to remember )
 
 1. Consider an alphanumeric string of 6 values starting with an alphabet in lowercase, that you need to use as **UniqueID** for the rest of the lab. For example: **a14d6e**.
 
-2. Note: Deploy all the resources in the same region
+2. Deploy all the resources in the same region
+
+3. Select the region only in the **Region** property. Do not make any modifications to **Location** property "[resourceGroup().location]". 
+
+![Location Details](./media/Location-details.jpg)
 
 ## Deployment Guide
 
