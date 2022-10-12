@@ -40,6 +40,16 @@ Deploy the files in Azure after providing the UniqueID value just as you did in 
 Download the files "deploy-vnetcore.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-core/".
 
 **b) Deploy:** <br/>
-Deploy the file in Azure. It is not required to provide UniqueID value to this file
+Deploy the file in Azure. It is not required to provide UniqueID value to this file.
+
+------------------------------------------------------------------
+
+### 4. Deploy to Resource Group: rg-core
+
+**a) Files to download:** <br/>
+Download the files "deploy-vnetprod.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-prod/".
+
+**b) Deploy:** <br/>
+Deploy the file in Azure. It is not required to provide UniqueID value to this file.
 
 ------------------------------------------------------------------
