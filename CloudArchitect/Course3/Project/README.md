@@ -4,8 +4,12 @@
 
 1. Consider an alphanumeric string of 6 values starting with an alphabet in lowercase, that you need to use as **UniqueID** for the rest of the lab. For example: **a14d6e**.
 
-## Deployment
+## Deployment Guide
 
 ### 1. Deploy to Resource Group: rg-data
 
+**a) Files to download:** <br/>
+Download the files "deploy-02.json" and "deploy-02.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-data".
 
+**b) Deploy:** <br/>
+Deploy the files in Azure after providing the UniqueID value.
