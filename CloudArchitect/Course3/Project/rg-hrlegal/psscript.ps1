@@ -3,19 +3,7 @@ Start-Transcript -Path C:\WindowsAzure\Logs\UdacityCustomScriptExtension.txt -Ap
 [Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls" 
 
-#Importing functions
-Disable-InternetExplorerESC
-Enable-IEFileDownload
-Enable-CopyPageContent-In-InternetExplorer
-InstallChocolatey
-DisableServerMgrNetworkPopup
-CreateLabFilesDirectory
-DisableWindowsFirewall
-InstallEdgeChromium
-InstallAzPowerShellModule
-
-
-#Functions
+#Function definitions
 
 Function Disable-InternetExplorerESC
 {
@@ -98,16 +86,6 @@ Function InstallEdgeChromium
 
     #Setting up the edge browser as default
 
-    #Invoke-WebRequest 'https://experienceazure.blob.core.windows.net/templates/cloudlabs-common/SetUserFTA.zip' -OutFile 'C:\SetUserFTA.zip'
-    #Expand-Archive -Path 'C:\SetUserFTA.zip' -DestinationPath 'C:\' -Force
-    #cmd.exe /c C:\SetUserFTA\SetUserFTA.exe
-    #cmd.exe /c cd C:\SetUserFTA
-    #cmd.exe /c SetuserFTA http MSEdgeHTM
-    #cmd.exe /c SetuserFTA https MSEdgeHTM
-    #cmd.exe /c SetuserFTA .htm MSEdgeHTM
-    #Sleep 5
-    #Remove-Item -Path 'C:\SetUserFTA.zip'
-    #Remove-Item -Path 'C:\SetUserFTA' -Force -Recurse
 }
 
 Function InstallAzPowerShellModule
@@ -122,3 +100,16 @@ Function InstallAzPowerShellModule
     Start-Process msiexec.exe -Wait '/I C:\Packages\Az-Cmdlets-5.0.0.33612-x64.msi /qn' -Verbose 
 
 }
+
+#Function calls
+Disable-InternetExplorerESC
+Enable-IEFileDownload
+Enable-CopyPageContent-In-InternetExplorer
+InstallChocolatey
+DisableServerMgrNetworkPopup
+CreateLabFilesDirectory
+DisableWindowsFirewall
+InstallEdgeChromium
+InstallAzPowerShellModule
+
+
