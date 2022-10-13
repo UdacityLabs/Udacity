@@ -29,6 +29,7 @@ $commonscriptpath = "$path" + "\cloudlabs-common\cloudlabs-windows-functions.ps1
 
 #>
 # Run Imported functions from cloudlabs-windows-functions.ps1
+
 Disable-InternetExplorerESC
 Enable-IEFileDownload
 Enable-CopyPageContent-In-InternetExplorer
