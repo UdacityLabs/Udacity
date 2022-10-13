@@ -77,6 +77,8 @@ Create a resource group with name rg-hrlegal.
 **c) Deploy:** <br/>
 Deploy the file to rg-hrlegal resource group by providing your AzureUserName, AzurePassword and the UniqueID.
 
+![Azure account details Details](./media/Az-account-details.jpg)
+
 ------------------------------------------------------------------
 
 ### 6. Deploy to Resource Group: rg-operations
