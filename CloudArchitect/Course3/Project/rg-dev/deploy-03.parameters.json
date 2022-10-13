@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "adminUsername": {
+        "value": "demouser"
+      },
+      "adminPassword": {
+        "value": "Password.!!1"
+      },
+      "AzureUserName": {
+        "value": "Enter-Your-Azure-UserName"
+      },
+      "UniqueID": {
+        "value": "Enter-Any-6-AlphaNumeraic-Values-Starting-With-An-Alphabet-In-LowerCase"
+      }
+    }
+  }
