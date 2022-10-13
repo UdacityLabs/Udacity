@@ -75,7 +75,7 @@ Download the files "deploy-01.json" and "deploy-01.parameters.json" available in
 Create a resource group with name rg-hrlegal.
 
 **c) Deploy:** <br/>
-Deploy the file to rg-hrlegal resource group by providing the AzureUserName, AzurePassword and UniqueID.
+Deploy the file to rg-hrlegal resource group by providing your AzureUserName, AzurePassword and the UniqueID.
 
 ------------------------------------------------------------------
 
@@ -88,6 +88,19 @@ Download the files "deploy-07.json" and "deploy-07.parameters.json" available in
 Create a resource group with name rg-operations.
 
 **c) Deploy:** <br/>
-Deploy the file to rg-operations resource group by providing the AzureUserName, AzurePassword and UniqueID.
+Deploy the file to rg-operations resource group by providing your AzureUserName, AzurePassword and the UniqueID.
+
+------------------------------------------------------------------
+
+### 7. Deploy to Resource Group: rg-dev
+
+**a) Files to download:** <br/>
+Download the files "deploy-03.json" and "deploy-03.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-dev/".
+
+**b) Create Resource Group:** <br/>
+Create a resource group with name rg-dev.
+
+**c) Deploy:** <br/>
+Deploy the file to rg-dev resource group by providing your AzureUserName, AzurePassword and the UniqueID.
 
 ------------------------------------------------------------------
