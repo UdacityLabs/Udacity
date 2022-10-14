@@ -13,97 +13,44 @@
 
 ## Deployment Guide
 
-### 1. Deploy to Resource Group: rg-data
+### 1. Deploy to Resource Group: JumpVM
 
 **a) Files to download:** <br/>
-Download the files "deploy-02.json" and "deploy-02.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-data/".
+Download the files "deploy-01.json" and "deploy-01.parameters.json" available in the path "Udacity/CloudArchitect/Course2/Project/RG-JumpVM/".
 
 **b) Create Resource Group:** <br/>
-Create a resource group with name rg-data.
+Create a resource group with name JumpVM.
 
 **c) Deploy:** <br/>
-Deploy the files to rg-data resource group after providing the UniqueID value.
-
-![UniqueID Details](./media/provide-uniqueid.jpg)
-
-------------------------------------------------------------------
-
-### 2. Deploy to Resource Group: rg-devdata
-
-**a) Files to download:** <br/>
-Download the files "deploy-04.json" and "deploy-04.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-devdata/".
-
-**b) Create Resource Group:** <br/>
-Create a resource group with name rg-devdata.
-
-**c) Deploy:** <br/>
-Deploy the files to rg-devdata resource group after providing the UniqueID value just as you did in the previous step.
-
-------------------------------------------------------------------
-
-### 3. Deploy to Resource Group: rg-core
-
-**a) Files to download:** <br/>
-Download the files "deploy-vnetcore.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-core/".
-
-**b) Create Resource Group:** <br/>
-Create a resource group with name rg-core.
-
-**c) Deploy:** <br/>
-Deploy the file to rg-core resource group. It is not required to provide UniqueID value to this file.
-
-------------------------------------------------------------------
-
-### 4. Deploy to Resource Group: rg-prod
-
-**a) Files to download:** <br/>
-Download the files "deploy-vnetprod.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-prod/".
-
-**b) Create Resource Group:** <br/>
-Create a resource group with name rg-prod.
-
-**c) Deploy:** <br/>
-Deploy the file to rg-prod resource group. It is not required to provide UniqueID value to this file.
-
-------------------------------------------------------------------
-
-### 5. Deploy to Resource Group: rg-hrlegal
-
-**a) Files to download:** <br/>
-Download the files "deploy-01.json" and "deploy-01.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-hrlegal/".
-
-**b) Create Resource Group:** <br/>
-Create a resource group with name rg-hrlegal.
-
-**c) Deploy:** <br/>
-Deploy the file to rg-hrlegal resource group by providing your AzureUserName, AzurePassword and the UniqueID.
+Deploy the file to JumpVM resource group by providing your AzureUserName, AzurePassword and the UniqueID.
 
 ![Azure account details Details](./media/Az-account-details.jpg)
 
 ------------------------------------------------------------------
 
-### 6. Deploy to Resource Group: rg-operations
+### 2. Deploy to Resource Group: Udacity
 
 **a) Files to download:** <br/>
-Download the files "deploy-07.json" and "deploy-07.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-operations/".
+Download the files "deploy-01.json" and "deploy-01.parameters.json" available in the path "Udacity/CloudArchitect/Course2/Project/RG-Udacity/".
 
 **b) Create Resource Group:** <br/>
-Create a resource group with name rg-operations.
+Create a resource group with name Udacity.
 
 **c) Deploy:** <br/>
-Deploy the file to rg-operations resource group by providing your AzureUserName, AzurePassword and the UniqueID.
+Deploy the file to Udacity resource group by providing your AzureUserName, AzurePassword and the UniqueID.
 
 ------------------------------------------------------------------
 
-### 7. Deploy to Resource Group: rg-dev
+### 3. Deploy to Resource Group: UdacityDemo
 
 **a) Files to download:** <br/>
-Download the files "deploy-03.json" and "deploy-03.parameters.json" available in the path "Udacity/CloudArchitect/Course3/Project/rg-dev/".
+Download the files "deploy-01.json" and "deploy-01.parameters.json" available in the path "Udacity/CloudArchitect/Course2/Project/RG-UdacityDemo/".
 
 **b) Create Resource Group:** <br/>
-Create a resource group with name rg-dev.
+Create a resource group with name UdacityDemo.
 
 **c) Deploy:** <br/>
-Deploy the file to rg-dev resource group by providing your AzureUserName, AzurePassword and the UniqueID.
+Deploy the file to UdacityDemo resource group by providing only the UniqueID.
 
 ------------------------------------------------------------------
+
