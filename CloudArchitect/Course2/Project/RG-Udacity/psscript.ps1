@@ -112,3 +112,4 @@ CreateLabFilesDirectory
 DisableWindowsFirewall
 InstallEdgeChromium
 InstallAzPowerShellModule
+
