@@ -28,21 +28,20 @@
       }
     },
     "variables": {
-      "cloudlabsCommon": "[concat(' -AzureUserName ', parameters('AzureUserName'), ' -AzurePassword ', parameters('AzurePassword'), ' -AzureTenantID ', variables('AzureTenantID'), ' -AzureSubscriptionID ', variables('AzureSubscriptionID'), ' -ODLID ', parameters('ODLID'), ' -DeploymentID ', parameters('DeploymentID'),' -InstallCloudLabsShadow ', parameters('InstallCloudLabsShadow'))]",
       "AzureSubscriptionID": "[subscription().subscriptionId]",
       "AzureTenantID": "[subscription().tenantId]",
       "virtualNetworkName": "vNet",
       "vmNamePrefix": "udacityvm",
-      "vmName": "[concat('UdacityVM-',parameters('DeploymentID'))]",
+      "vmName": "[concat('UdacityVM-',parameters('UniqueID'))]",
       "virtualMachineSize": "Standard_DS1_v2",
       "networkInterfaceName": "[concat(variables('vmNamePrefix'), '-nic')]",
       "networkSecurityGroupName": "[concat(variables('vmNamePrefix'), '-nsg')]",
       "publicIpAddressName": "[concat(variables('vmNamePrefix'), '-pip')]",
-      "publicIpAddressDNSName": "[concat(variables('vmNamePrefix'), parameters('DeploymentID'))]",
+      "publicIpAddressDNSName": "[concat(variables('vmNamePrefix'), parameters('UniqueID'))]",
       "subnetName": "default",
       "location": "[resourceGroup().location]",
       "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/',variables('virtualNetworkName'), variables('subnetName'))]",
-      "storageAccountName": "[concat('storage', parameters('DeploymentID'))]"
+      "storageAccountName": "[concat('storage', parameters('UniqueID'))]"
     },
     "resources": [
       {
@@ -106,10 +105,9 @@
           "autoUpgradeMinorVersion": true,
           "settings": {
             "fileUris": [
-              "https://experienceazure.blob.core.windows.net/templates/cloudlabs-common/cloudlabs-windows-functions.ps1",
-              "https://udacityprodacc.blob.core.windows.net/azinsights/psscript.ps1"
+              "https://raw.githubusercontent.com/UdacityLabs/Udacity/main/CloudArchitect/Course2/Project/RG-Udacity/psscript.ps1"
             ],
-            "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File psscript.ps1', variables('cloudlabsCommon'))]"
+            "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File psscript.ps1"
           }
         }
       },
@@ -232,9 +230,9 @@
         "type": "string",
         "value": "[parameters('adminPassword')]"
       },
-      "DeploymentID": {
+      "UniqueID": {
         "type": "string",
-        "value": "[parameters('DeploymentID')]"
+        "value": "[parameters('UniqueID')]"
       }
     }
   }
