@@ -1,0 +1,1205 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "admin123",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "rootUsername": {
+      "type": "string",
+      "defaultValue": "root",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "defaultValue": "Password123!",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "kaliAdminUsername": {
+      "type": "string",
+      "defaultValue": "labuser",
+      "metadata": {
+        "description": "Username for the Kali and Kali internal Virtual Machine."
+      }
+    },
+    "kaliAdminPassword": {
+      "type": "securestring",
+      "defaultValue": "ajjt88THC*FW!",
+      "metadata": {
+        "description": "Password for the Kali and Kali internal Virtual Machine."
+      }
+    }
+
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "kalivmName": "kali",
+    "kalivmSize": "Standard_D4s_v3",
+    "kalivirtualNetworkName": "kaliVnet",
+    "kalinicName": "kali876",
+    "kaliaddressPrefix": "10.2.0.0/16",
+    "kalisubnetName": "default",
+    "kalisubnetPrefix": "10.2.0.0/24",
+    "kalidiskStorageType": "Standard_LRS",
+    "kalipublicIPAddressName": "kali-ip",
+    "kalinetworkSecurityGroupName": "kali-nsg",
+    "kalisubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('kalivirtualNetworkName'), variables('kalisubnetName'))]",
+    "kaliPipDnsName": "[concat('kali-', uniqueString(resourceGroup().id))]",
+    "debianx64DMZOnCloudNewvmName": "debianx64DMZOnCloudNew",
+    "debianx64DMZOnCloudNewvmSize": "Standard_B2s",
+    "migrateVmVirtualNetworkName": "MigrateVM-vnet",
+    "debianx64DMZOnCloudNewnicName": "debianx64dmzoncloudn979",
+    "debianx64DMZOnCloudNewaddressPrefix": "10.1.0.0/16",
+    "debianx64DMZOnCloudNewsubnetName": "servers",
+    "debianx64DMZOnCloudNewsubnetPrefix": "10.1.0.0/24",
+    "debianx64DMZOnCloudNewdiskStorageType": "Standard_LRS",
+    "debianx64DMZOnCloudNewpublicIPAddressName": "debianx64DMZOnCloudNew-ip",
+    "publicIPAddressType": "Dynamic",
+    "debianx64DMZOnCloudNewnetworkSecurityGroupName": "debianx64DMZOnCloudNew-nsg",
+    "DMZnetworkSecurityGroupName": "DMZSecurity",
+    "migrateVmVnetsubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('migrateVmVirtualNetworkName'), variables('debianx64DMZOnCloudNewsubnetName'))]",
+    "debianx64DMZOnCloudNewPipDnsName": "[concat('debnew-', uniqueString(resourceGroup().id))]",
+    "Debianx64DMZwebCMSCloudvmName": "Debianx64DMZwebCMSCloud",
+    "Debianx64DMZwebCMSCloudvmSize": "Standard_B2s",
+    "Debianx64DMZwebCMSCloudnicName": "debianx64dmzwebcmscl163",
+    "Debianx64DMZwebCMSClouddiskStorageType": "Standard_LRS",
+    "Debianx64DMZwebCMSCloudpublicIPAddressName": "Debianx64DMZwebCMSCloud-ip",
+    "Debianx64DMZwebCMSCloudnetworkSecurityGroupName": "Debianx64DMZwebCMSCloud-nsg",
+    "Debianx64DMZwebCMSCloudPipDnsName": "[concat('debmscloud-', uniqueString(resourceGroup().id))]",
+    "DMZIServervmName": "DMZIServer",
+    "DMZIServervmSize": "Standard_D2s_v3",
+    "DMZIServernicName": "dmziserver483",
+    "DMZIServerdiskStorageType": "Standard_LRS",
+    "DMZIServerpublicIPAddressName": "DMZIServer-ip",
+    "DMZIServernetworkSecurityGroupName": "DMZIServer-nsg",
+    "DMZIServerPipDnsName": "[concat('dmziserver-', uniqueString(resourceGroup().id))]",
+    "resourceGroupName": "[resourceGroup().name]",
+    "kaliinternalvmName": "kaliinternal",
+    "kaliinternalvmSize": "Standard_B2s",
+    "kaliinternalnicName": "kaliinternal572",
+    "kaliinternalpublicIPAddressName": "kaliinternal-pip",
+    "kaliinternalnetworkSecurityGroupName": "kaliInternalnsg798",
+    "forWin10SubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('migrateVmVirtualNetworkName'), variables('win_10subnetName'))]",
+    "kaliinternalPipDnsName": "[concat('kaliinternalinternal-', uniqueString(resourceGroup().id))]",
+    "win10vmName": "win10",
+    "win10vmSize": "Standard_D2s_v3",
+    "win10nicName": "win10203",
+    "win_10subnetName": "for_win10",
+    "win10publicIPAddressName": "win10-pip",
+    "win10networkSecurityGroupName": "win10-nsg",
+    "win10PipDnsName": "[concat('win10-', uniqueString(resourceGroup().id))]",
+    "DNSServervmName": "DNSServer",
+    "DNSServervmSize": "Standard_B2s",
+    "DNSServernicName": "dnsserver184",
+    "DNSServerdiskStorageType": "Standard_LRS",
+    "DNSServerpublicIPAddressName": "DNSServer-pip",
+    "DNSServernetworkSecurityGroupName": "DNSServer-nsg",
+    "DNSServerPipDnsName": "[concat('dnsserver-', uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('kalipublicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('kaliPipDnsName')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('kalivirtualNetworkName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('kaliaddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('kalisubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('kalisubnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('kalinetworkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "priority": 300,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          },
+          {
+            "name": "kali_xrdp",
+            "properties": {
+              "priority": 310,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('kalinicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('kalipublicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('kalivirtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.2.0.4",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('kalipublicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('kalisubnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('kalinetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('kalivmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('kalinicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('kalivmSize')]"
+        },
+
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('kalivmName'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 128
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-kali-IMAGE-ID-HERE>"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('kalinicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('debianx64DMZOnCloudNewpublicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('debianx64DMZOnCloudNewPipDnsName')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('migrateVmVirtualNetworkName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('DMZnetworkSecurityGroupName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('debianx64DMZOnCloudNewaddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('debianx64DMZOnCloudNewsubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('debianx64DMZOnCloudNewsubnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('DMZnetworkSecurityGroupName'))]"
+              }
+            }
+          },
+          {
+            "name": "for_win10",
+            "properties": {
+              "addressPrefix": "10.1.2.0/24"
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "10.1.1.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('debianx64DMZOnCloudNewnetworkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "priority": 300,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          },
+          {
+            "name": "deny_from_vpn",
+            "properties": {
+              "priority": 1030,
+              "protocol": "*",
+              "access": "Deny",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "10.10.10.0/24",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "10.1.0.12",
+              "destinationPortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('DMZnetworkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "RDP",
+            "properties": {
+              "priority": 130,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          },
+          {
+            "name": "SSH",
+            "properties": {
+              "priority": 110,
+              "protocol": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          },
+          {
+            "name": "SQL",
+            "properties": {
+              "priority": 140,
+              "protocol": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3306"
+            }
+          },
+          {
+            "name": "FTP",
+            "properties": {
+              "priority": 120,
+              "protocol": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "20-25"
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "priority": 150,
+              "protocol": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80"
+            }
+          },
+          {
+            "name": "blockVPNfromZone3",
+            "properties": {
+              "priority": 100,
+              "protocol": "*",
+              "access": "Deny",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "10.10.10.0/24",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('debianx64DMZOnCloudNewnicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('debianx64DMZOnCloudNewpublicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('migrateVmVirtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.1.0.12",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('debianx64DMZOnCloudNewpublicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('migrateVmVnetsubnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('debianx64DMZOnCloudNewnetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('debianx64DMZOnCloudNewvmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('debianx64DMZOnCloudNewnicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('debianx64DMZOnCloudNewvmSize')]"
+        },
+
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('debianx64DMZOnCloudNewvmName'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 128
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-debianx64DMZOnCloudNew-IMAGE-ID-HERE>"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('debianx64DMZOnCloudNewnicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('Debianx64DMZwebCMSCloudpublicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('Debianx64DMZwebCMSCloudPipDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('Debianx64DMZwebCMSCloudnetworkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "priority": 300,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          },
+          {
+            "name": "block_from_vpn",
+            "properties": {
+              "priority": 250,
+              "protocol": "*",
+              "access": "Deny",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "10.10.10.0/24",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "10.1.0.11",
+              "destinationPortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('Debianx64DMZwebCMSCloudnicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('Debianx64DMZwebCMSCloudpublicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('migrateVmVirtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.1.0.11",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('Debianx64DMZwebCMSCloudpublicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('migrateVmVnetsubnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('Debianx64DMZwebCMSCloudnetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('Debianx64DMZwebCMSCloudvmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('Debianx64DMZwebCMSCloudnicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('Debianx64DMZwebCMSCloudvmSize')]"
+        },
+
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('Debianx64DMZwebCMSCloudvmName'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 128
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-debianx64dmzwebcmscl163-IMAGE-ID-HERE>"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('Debianx64DMZwebCMSCloudnicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('DMZIServerpublicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('DMZIServerPipDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('DMZIServernetworkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "priority": 300,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          },
+          {
+            "name": "SQL",
+            "properties": {
+              "priority": 360,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3306"
+            }
+          },
+          {
+            "name": "HTTPS",
+            "properties": {
+              "priority": 320,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "priority": 340,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80"
+            }
+          },
+          {
+            "name": "FTP",
+            "properties": {
+              "priority": 350,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "20-25"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('DMZIServernicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('DMZIServerpublicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('migrateVmVirtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.1.0.7",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('DMZIServerpublicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('migrateVmVnetsubnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('DMZIServernetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('DMZIServervmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('DMZIServernicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('DMZIServervmSize')]"
+        },
+
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('DMZIServervmName'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 30
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-DMZIServer-IMAGE-ID-HERE>"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('DMZIServernicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('kaliinternalpublicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('kaliinternalPipDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('kaliinternalnetworkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "priority": 300,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          },
+          {
+            "name": "HTTPS",
+            "properties": {
+              "priority": 340,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "priority": 320,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80"
+            }
+          },
+          {
+            "name": "ALLOWXRDP",
+            "properties": {
+              "priority": 200,
+              "protocol": "*",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          },
+          {
+            "name": "FTP",
+            "properties": {
+              "priority": 350,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "21-22"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('kaliinternalnicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('kaliinternalpublicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('migrateVmVirtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.1.2.5",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('kaliinternalpublicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('forWin10SubnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('kaliinternalnetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('kaliinternalvmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('kaliinternalnicName'))]"
+      ],
+
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('kaliinternalvmSize')]"
+        },
+
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('kaliinternalvmName'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 128
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-kaliinternal-IMAGE-ID-HERE>"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('kaliinternalnicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('win10publicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('win10PipDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('win10networkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "RDP",
+            "properties": {
+              "priority": 300,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('win10nicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('win10publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('migrateVmVirtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.1.2.4",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('win10publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('forWin10SubnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('win10networkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('win10vmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('win10nicName'))]"
+      ],
+      "plan": {
+        "name": "pro-preview",
+        "product": "windows10preview",
+        "publisher": "microsoft-hyperv"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('win10vmSize')]"
+        },
+
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('win10vmName'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 127
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-win10-IMAGE-ID-HERE>"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('win10nicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('DNSServerpublicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('DNSServerPipDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('DNSServernetworkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "RDP",
+            "properties": {
+              "priority": 300,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2017-04-01",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('DNSServernicName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('DNSServerpublicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('migrateVmVirtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.1.0.8",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('DNSServerpublicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('migrateVmVnetsubnetRef')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('DNSServernetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('DNSServervmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('DNSServernicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('DNSServervmSize')]"
+        },
+
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('DNSServervmName'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 127
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-DNSServer-IMAGE-ID-HERE>"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('DNSServernicName'))]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "Kali DNS Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('kalipublicIPAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "Kali Username": {
+      "type": "string",
+      "value": "[parameters('kaliAdminUsername')]"
+    },
+    "Kali Password": {
+      "type": "string",
+      "value": "[parameters('kaliAdminPassword')]"
+    },
+    "Kaliinternal DNS Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('kaliinternalpublicIPAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "Kaliinternal Username": {
+      "type": "string",
+      "value": "[parameters('kaliAdminUsername')]"
+    },
+    "Kaliinternal Password": {
+      "type": "string",
+      "value": "[parameters('kaliAdminPassword')]"
+    },
+    "Win10 DNS Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('win10publicIPAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "Win10 Username": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "Win10 Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+    "DNSServer DNS Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('DNSServerpublicIPAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "DNSServer Username": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "DNSServer Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+    "DMZIServer DNS Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('DMZIServerpublicIPAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "DMZIServer Username": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "DMZIServer Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+    "Debianx64DMZwebCMSCloud DNS Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('Debianx64DMZwebCMSCloudpublicIPAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "Debianx64DMZwebCMSCloud Username": {
+      "type": "string",
+      "value": "[parameters('rootUsername')]"
+    },
+    "Debianx64DMZwebCMSCloud Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+    "debianx64DMZOnCloudNew DNS Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('debianx64DMZOnCloudNewpublicIPAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "debianx64DMZOnCloudNew Username": {
+      "type": "string",
+      "value": "[parameters('rootUsername')]"
+    },
+    "debianx64DMZOnCloudNew Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    }
+  }
+}
