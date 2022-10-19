@@ -1,0 +1,377 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "UniqueID": {
+        "type": "string",
+        "metadata": {
+            "description": "Enter Any 6 AlphaNumeraic Values Starting With An Alphabet In LowerCase. Example: a14d6e"
+          }
+      }
+  },
+  "variables": {
+    "osDiskType": "Standard_LRS",
+    "location": "[resourceGroup().location]",
+    "virtualNetworkName": "[concat('fabmedical', '-vnet')]",
+    "virtualNetworAddressPrefixes": [
+      "172.16.0.0/16"
+    ],
+    "virtualNetworkSubnets": [
+      {
+        "name": "default",
+        "properties": {
+          "addressPrefix": "172.16.0.0/24"
+        }
+      }
+    ],
+    "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "subnetName": "default",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+    "networkSecurityGroupName": "[concat('labvm', '-nsg')]",
+    "networkSecurityGroupRules": [
+      {
+        "name": "RDP",
+        "properties": {
+          "priority": 300,
+          "protocol": "TCP",
+          "access": "Allow",
+          "direction": "Inbound",
+          "sourceAddressPrefix": "*",
+          "sourcePortRange": "*",
+          "destinationAddressPrefix": "*",
+          "destinationPortRange": "3389"
+        }
+      }
+    ],
+    "publicIpAddressName": "[concat('labvm', '-ip')]",
+    "publicIpAddressType": "Dynamic",
+    "publicIpAddressSku": "Basic",
+    "networkInterfaceName": "[concat('labvm-', 'nic')]",
+    "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+    "virtualMachineName": "[concat('labvm-', parameters('UniqueID'))]",
+    "virtualMachineSize": "Standard_B2s",
+    "networkSecurityGroupNameLinux": "[concat('fabmedical', '-nsg')]",
+    "networkSecurityGroupRulesLinux": [
+      {
+        "name": "SSH",
+        "properties": {
+          "priority": 300,
+          "protocol": "TCP",
+          "access": "Allow",
+          "direction": "Inbound",
+          "sourceAddressPrefix": "*",
+          "sourcePortRange": "*",
+          "destinationAddressPrefix": "*",
+          "destinationPortRange": "22"
+        }
+      }
+
+    ],
+    "publicIpAddressNameLinux": "[concat('udacity-', 'ip')]",
+    "AzureSubscriptionID": "[subscription().subscriptionId]",
+    "AzureTenantID": "[subscription().tenantId]",
+    "publicIpAddressTypeLinux": "Static",
+    "publicIpAddressSkuLinux": "Basic",
+    "networkInterfaceNameLinux": "[concat('udacity-', parameters('UniqueID'))]",
+    "nsgIdLinux": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupNameLinux'))]",
+    "sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+    "virtualMachineNameLinux": "ubuntu",
+    "virtualMachineSizeLinux": "Standard_B2s",
+
+    "publicIpAddressDNSName": "[concat('fabmedicald', parameters('UniqueID'))]",
+    "publicIpAddressDNSNameLinux": "[concat('udacity', parameters('UniqueID'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-09-01",
+      "name": "pid-e843308b-3ce2-42a2-b743-2f21b36a5e68",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
+    {
+      "name": "[variables('networkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": "[variables('networkSecurityGroupRules')]"
+      }
+    },
+    {
+      "name": "[variables('virtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": "[variables('virtualNetworAddressPrefixes')]"
+        },
+        "subnets": "[variables('virtualNetworkSubnets')]"
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressName')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSName'))]"
+        }
+      },
+      "sku": {
+        "name": "[variables('publicIpAddressSku')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('networkInterfaceName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgId')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+      ],
+      "properties": {
+        "osProfile": {
+          "computerName": "[variables('virtualMachineName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "windowsConfiguration": {
+            "provisionVmAgent": "true"
+          }
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSize')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "fromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('osDiskType')]"
+            }
+          },
+
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2016-Datacenter",
+            "version": "latest"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('virtualMachineName'),'/', 'winExtension')]",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+      "comments": "Script",
+      "tags": {
+        "displayName": "VM Extension"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "https://raw.githubusercontent.com/UdacityLabs/Udacity/main/EnterpriseSecurityND/Course1-project/script-02.ps1"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File script-02.ps1"
+        }
+      }
+    },
+    {
+      "name": "[variables('networkSecurityGroupNameLinux')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": "[variables('networkSecurityGroupRulesLinux')]"
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressNameLinux')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSNameLinux'))]"
+        }
+      },
+      "sku": {
+        "name": "[variables('publicIpAddressSkuLinux')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('networkInterfaceNameLinux')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupNameLinux'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNameLinux'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNameLinux'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgIdLinux')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineNameLinux')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNameLinux'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSizeLinux')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          },
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "16.04-LTS",
+            "version": "latest"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNameLinux'))]"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[variables('virtualMachineNameLinux')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+
+        }
+
+      }
+    }
+  ],
+  "outputs": {
+    "UniqueID": {
+      "type": "string",
+      "value": "[parameters('UniqueID')]"
+    },
+    "LabVM DNS Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIpAddressName'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "LabVM Username": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "LabVM Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+    "Linux VM Public IP": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameLinux'))).ipAddress]",
+      "type": "string"
+    },
+    "Linux VM Dns Name": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameLinux'))).dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "Linux VM Username": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "Linux VM Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+    "Command to Connect to Linux VM ": {
+      "type": "string",
+      "value": "[concat('ssh  Udacity-Student@', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameLinux'))).dnsSettings.fqdn)]"
+    }
+
+  }
+}
