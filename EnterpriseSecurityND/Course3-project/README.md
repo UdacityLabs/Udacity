@@ -1,10 +1,10 @@
-# Enterprise Security Nanodegree Exercise Course 1 Project
+# Enterprise Security Nanodegree Exercise Course 3 Project
 
 ## Before you start (Pre-requisites & Points to remember )
 
 1. Consider an alphanumeric string of 6 values starting with an alphabet in lowercase, that you need to use as **UniqueID** for the rest of the lab. For example: **a14d6e**.
 
-2. Create/Ddeploy all the resource groups and resources in the same region.
+2. Create/Ddeploy all the resource groups and resources in the same region mentioned in the classroom instructions.
 
 3. Select the region only in the **Region** property. Do not make any modifications to **Location** property "[resourceGroup().location]". 
 
@@ -13,12 +13,17 @@
 ## Deployment Guide
 
 **a) Files to download:** <br/>
-Download the files "deploy-02.json" and "deploy-02.parameters.json" available in the path "Udacity/EnterpriseSecurityND/Course1-project/".
+Download the files "deploy-01.json" and "deploy-01.parameters.json" available in the path "Udacity/EnterpriseSecurityND/Course3-project/RG-ESND-C3/".
 
 **b) Deploy:** <br/>
-Deploy the files after providing the UniqueID value.
+Deploy the files after providing the UniqueID value and replacing the <PASTE-THE-VmName-IMAGE-ID-HERE> with image reference ID for all the VMs.
 
 ![UniqueID Details](./media/provide-uniqueid.jpg)
+
+
+
+
+![Image reference ID](./media/img-reference.jpg)
 
 
 -------------------------------------------------------------------------------
