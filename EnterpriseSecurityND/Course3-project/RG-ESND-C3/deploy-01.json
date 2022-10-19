@@ -1,0 +1,971 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "kaliadminUsername": {
+      "type": "string"
+
+    },
+    "kaliadminPassword": {
+      "type": "securestring"
+
+    },
+    "jumpvmadminUsername": {
+      "type": "string"
+    },
+    "jumpvmadminPassword": {
+      "type": "securestring"
+    },
+    "ubuntuadminUsername": {
+      "type": "string"
+    },
+    "ubuntuadminPassword": {
+      "type": "securestring"
+    },
+    "UniqueID": {
+        "type": "string",
+        "metadata": {
+            "description": "Enter Any 6 AlphaNumeraic Values Starting With An Alphabet In LowerCase. Example: a14d6e"
+          }
+      }
+
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "addressPrefix": "10.0.0.0/24",
+    "subnetPrefix": "10.0.0.0/24",
+    "virtualMachineSize": "Standard_DS1_v2",
+    "azureSubscriptionID": "[subscription().subscriptionId]",
+    "subscriptionid": "[subscription().subscriptionId]",
+    "osDiskType": "Standard_LRS",
+
+
+    "networkSecurityGroupNameLinux": "[concat('turnkey', '-nsg')]",
+    "networkSecurityGroupRulesLinux": [
+      {
+        "name": "SSH",
+        "properties": {
+          "priority": 300,
+          "protocol": "TCP",
+          "access": "Allow",
+          "direction": "Inbound",
+          "sourceAddressPrefix": "*",
+          "sourcePortRange": "*",
+          "destinationAddressPrefix": "*",
+          "destinationPortRange": "22"
+        }
+      },
+{
+                        "name": "Port_8000",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8000",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+
+{
+                        "name": "Port_8834",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8834",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 110,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+
+    ],
+    "publicIpAddressNameLinux": "[concat('Turnkey-', 'ip')]",
+    "publicIpAddressNamekali": "[concat('kali-', 'ip')]",
+    "publicIpAddressNamems2": "[concat('ms2-', 'ip')]",
+    "publicIpAddressNameubuntu": "[concat('ubuntu-', 'ip')]",
+
+    "AzureSubscriptionID": "[subscription().subscriptionId]",
+    "AzureTenantID": "[subscription().tenantId]",
+
+    "publicIpAddressTypeLinux": "Static",
+    "publicIpAddressSkuLinux": "Basic",
+    "linuxvirtualNetworkName": "turnkey-vnet",
+    "kalivirtualNetworkName": "kali-vnet",
+    "ms2virtualNetworkName": "ms2-vnet",
+    "ubuntuvirtualNetworkName": "ubuntu-vnet",
+    "networkSecurityGroupNameubuntu": "[concat('ubuntu', '-nsg')]",
+
+    "networkSecurityGroupNamekali": "[concat('kali', '-nsg')]",
+    "subnetName": "default",
+    "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('linuxvirtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+    "networkInterfaceNameLinux": "[concat('turnkey-', parameters('UniqueID'))]",
+    "networkInterfaceNamekali": "[concat('kali-', parameters('UniqueID'))]",
+    "networkInterfaceNamems2": "[concat('ms2-', parameters('UniqueID'))]",
+    "networkInterfaceNameubuntu": "[concat('ubuntu-', parameters('UniqueID'))]",
+    "nsgIdLinux": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupNameLinux'))]",
+    "nsgIdkali": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupNamekali'))]",
+    "nsgIdms2": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupNamems2'))]",
+    "nsgIdubuntu": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupNameubuntu'))]",
+    "virtualMachineNameubuntu": "[concat('ubuntu-', parameters('UniqueID'))]",
+    "virtualMachineNamems2": "[concat('ms2-', parameters('UniqueID'))]",
+    "virtualMachineNameLinux": "[concat('Turnkey-', parameters('UniqueID'))]",
+    "virtualMachineNamekali": "[concat('Kali-', parameters('UniqueID'))]",
+    "networkSecurityGroupNamems2": "[concat('ms2-', parameters('UniqueID'))]",
+    "virtualMachineSizeLinux": "Standard_DS1_v2",
+    "publicIpAddressDNSNameubuntu": "[concat('ubuntu', parameters('UniqueID'))]",
+    "publicIpAddressDNSNameLinux": "[concat('turnkey', parameters('UniqueID'))]",
+    "publicIpAddressDNSNamekali": "[concat('kali', parameters('UniqueID'))]",
+    "publicIpAddressDNSNamems2": "[concat('ms2', parameters('UniqueID'))]",
+    "jumpvmnetworkSecurityGroupName": "jumpvm-nsg",
+    "jumpvmvirtualNetworkName": "jumpvm-vnet",
+    "jumpvmsubnetName": "jumpvm-subnet",
+    "jumpvmDnsName": "[concat('jumpvm',uniqueString(resourceGroup().id))]",
+    "jumpvmNetworkInterfaceName": "jumpvm-nic",
+    "virtualMachineName": "[concat('jumpvm-', parameters('UniqueID'))]",
+    "jumpvmpublicIpAddressName": "[concat('jumpvm-', 'ip')]",
+    "networkSecurityGroupNamenessus": "nessus-nsg",
+    "publicIpAddressNamenessus": "[concat('nessus-', 'ip')]",
+    "publicIpAddressDNSNamenessus": "[concat('nessus', parameters('UniqueID'))]",
+    "networkInterfaceNamenessus": "[concat('nessus-', parameters('UniqueID'))]",
+    "nsgIdnessus": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupNamenessus'))]",
+    "virtualMachineNamenessus": "[concat('nessus-', parameters('UniqueID'))]",
+    "virtualMachineSizenessus": "Standard_DS1_v2",
+    "virtualMachineComputerName": "nessus"
+
+
+
+  },
+
+  "resources": [
+    {
+      "apiVersion": "2016-09-01",
+      "name": "pid-e843308b-3ce2-42a2-b743-2f21b36a5e68",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
+    {
+      "name": "[variables('jumpvmnetworkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "priority": 1030,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('jumpvmvirtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('jumpvmnetworkSecurityGroupName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('jumpvmpublicIpAddressName')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('jumpvmDnsName')]"
+        }
+      }
+    },
+
+    {
+      "name": "[variables('jumpvmNetworkInterfaceName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2016-09-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('jumpvmvirtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('jumpvmpublicIpAddressName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', variables('jumpvmvirtualNetworkName'), variables('subnetName'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('jumpvmpublicIpAddressName'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpvmnetworkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-06-01",
+      "location": "[resourceGroup().location]",
+
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('jumpvmNetworkInterfaceName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSize')]"
+        },
+
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('virtualMachineName'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 127
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-jumpvm-IMAGE-ID-HERE>"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('jumpvmNetworkInterfaceName'))]"
+            }
+          ]
+        }
+      }
+    },
+
+    {
+        "name": "[variables('networkSecurityGroupNamenessus')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2019-02-01",
+        "location": "[variables('location')]",
+        "properties": {
+          "securityRules": "[variables('networkSecurityGroupRulesLinux')]"
+        }
+      },
+      {
+        "name": "[variables('publicIpAddressNamenessus')]",
+        "type": "Microsoft.Network/publicIpAddresses",
+        "apiVersion": "2019-02-01",
+        "location": "[variables('location')]",
+        "properties": {
+          "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+          "dnsSettings": {
+            "domainNameLabel": "[concat(variables('publicIpAddressDNSNamenessus'))]"
+          }
+        },
+        "sku": {
+          "name": "[variables('publicIpAddressSkuLinux')]"
+        }
+      },
+      {
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2018-10-01",
+        "name": "[variables('networkInterfaceNamenessus')]",
+        "location": "[variables('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupNamenessus'))]",
+          "[concat('Microsoft.Network/virtualNetworks/', variables('jumpvmvirtualNetworkName'))]",
+          "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNamenessus'))]"
+        ],
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "subnet": {
+                  "id": "[variables('subnetRef')]"
+                },
+                "privateIPAllocationMethod": "Dynamic",
+                "publicIpAddress": {
+                  "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNamenessus'))]"
+                }
+              }
+            }
+          ],
+          "networkSecurityGroup": {
+            "id": "[variables('nsgIdnessus')]"
+          }
+        }
+      },
+      {
+        "name": "[variables('virtualMachineNamenessus')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2021-03-01",
+        "location": "[variables('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNamenessus'))]"
+        ],
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[variables('virtualMachineSizenessus')]"
+          },
+          "storageProfile": {
+            "osDisk": {
+              "createOption": "fromImage",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+              }
+            },
+            "imageReference": {
+              "publisher": "tenable",
+              "offer": "tenablecorenessus",
+              "sku": "tenablecorenessusbyol",
+              "version": "latest"
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNamenessus'))]"
+              }
+            ]
+          },
+          "osProfile": {
+            "computerName": "[variables('virtualMachineComputerName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "linuxConfiguration": {
+              "patchSettings": {
+                "patchMode": "ImageDefault"
+              }
+            }
+          },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": true
+            }
+          }
+        },
+        "plan": {
+          "name": "tenablecorenessusbyol",
+          "publisher": "tenable",
+          "product": "tenablecorenessus"
+        }
+      },
+
+    {
+      "name": "[variables('networkSecurityGroupNameLinux')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": "[variables('networkSecurityGroupRulesLinux')]"
+      }
+    },
+    {
+      "name": "[variables('linuxvirtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('networkSecurityGroupNameLinux'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressNameLinux')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSNameLinux'))]"
+        }
+      },
+      "sku": {
+        "name": "[variables('publicIpAddressSkuLinux')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('networkInterfaceNameLinux')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupNameLinux'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('linuxvirtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNameLinux'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNameLinux'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgIdLinux')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineNameLinux')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNameLinux'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSizeLinux')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('virtualMachineNameLinux'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 127
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-Turnkey-IMAGE-ID-HERE>"
+          }
+        },
+
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNameLinux'))]"
+            }
+          ]
+        }
+
+      }
+    },
+    {
+      "name": "[variables('networkSecurityGroupNamekali')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": "[variables('networkSecurityGroupRulesLinux')]"
+      }
+    },
+    {
+      "name": "[variables('kalivirtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('networkSecurityGroupNamekali'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressNamekali')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSNamekali'))]"
+        }
+      },
+      "sku": {
+        "name": "[variables('publicIpAddressSkuLinux')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('networkInterfaceNamekali')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupNamekali'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('kalivirtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNamekali'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNamekali'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgIdkali')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineNamekali')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNamekali'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSizeLinux')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('virtualMachineNamekali'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 127
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-Kali-IMAGE-ID-HERE>"
+          }
+        },
+
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNamekali'))]"
+            }
+          ]
+        }
+
+      }
+    },
+    {
+      "name": "[variables('networkSecurityGroupNamems2')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": "[variables('networkSecurityGroupRulesLinux')]"
+      }
+    },
+    {
+      "name": "[variables('ms2virtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('networkSecurityGroupNamems2'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressNamems2')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSNamems2'))]"
+        }
+      },
+      "sku": {
+        "name": "[variables('publicIpAddressSkuLinux')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('networkInterfaceNamems2')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupNamems2'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('ms2virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNamems2'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNamems2'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgIdms2')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineNamems2')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNamems2'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSizeLinux')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('virtualMachineNamems2'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 127
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-ms2-IMAGE-ID-HERE>"
+          }
+        },
+
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNamems2'))]"
+            }
+          ]
+        }
+
+      }
+    },
+    {
+      "name": "[variables('networkSecurityGroupNameubuntu')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": "[variables('networkSecurityGroupRulesLinux')]"
+      }
+    },
+    {
+      "name": "[variables('ubuntuvirtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('networkSecurityGroupNameubuntu'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressNameubuntu')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSNameubuntu'))]"
+        }
+      },
+      "sku": {
+        "name": "[variables('publicIpAddressSkuLinux')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('networkInterfaceNameubuntu')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupNameubuntu'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('ubuntuvirtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNameubuntu'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNameubuntu'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgIdubuntu')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineNameubuntu')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNameubuntu'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSizeLinux')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('virtualMachineNameubuntu'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 512
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-ubuntu-IMAGE-ID-HERE>"
+          }
+        },
+
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNameubuntu'))]"
+            }
+          ]
+        }
+
+      }
+    }
+
+  ],
+  "outputs": {
+
+    "Turnkey VM Public IP": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameLinux'))).ipAddress]",
+      "type": "string"
+    },
+
+    "Turnkey VM Username": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "Turnkey VM Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+    "Command to Connect to Turnkey VM ": {
+      "type": "string",
+      "value": "[concat('ssh  udacity@', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameLinux'))).ipAddress)]"
+    },
+    "Kali VM Public IP": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNamekali'))).ipAddress]",
+      "type": "string"
+    },
+
+    "Kali VM Username": {
+      "type": "string",
+      "value": "[parameters('kaliadminUsername')]"
+    },
+    "Kali VM Password": {
+      "type": "string",
+      "value": "[parameters('kaliadminPassword')]"
+    },
+    "Command to Connect to Kali Linux VM ": {
+      "type": "string",
+      "value": "[concat('ssh  kali@', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNamekali'))).ipAddress)]"
+    },
+
+    "Ms2 VM Public IP": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNamems2'))).ipAddress]",
+      "type": "string"
+    },
+
+    "Ms2 VM Username": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "Ms2 VM Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+    "Command to Connect to Ms2 VM ": {
+      "type": "string",
+      "value": "[concat('ssh  udacity@', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNamems2'))).ipAddress)]"
+    },
+    "Nessus Public IP": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNamenessus'))).ipAddress]",
+      "type": "string"
+    },
+
+    "Nessus Username": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "Nessus VM Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    },
+
+    "JumpVm DNSName": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('jumpvmpublicIpAddressName'))).dnsSettings.fqdn]"
+    },
+    "JumpVm AdminUsername": {
+      "type": "string",
+      "value": "[parameters('jumpvmadminUsername')]"
+    },
+    "JumpVm AdminPassword": {
+      "type": "string",
+      "value": "[parameters('jumpvmadminPassword')]"
+    },
+    "ubuntu VM Username": {
+      "type": "string",
+      "value": "[parameters('ubuntuadminUsername')]"
+    },
+    "ubuntu VM Password": {
+      "type": "string",
+      "value": "[parameters('ubuntuadminPassword')]"
+    },
+    "Command to Connect to ubuntu VM ": {
+      "type": "string",
+      "value": "[concat('ssh  ubuntu@', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameubuntu'))).ipAddress)]"
+    }
+
+
+  }
+}
+    

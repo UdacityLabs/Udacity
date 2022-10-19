@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "value": "Udacity"
+    },
+    "adminPassword": {
+      "value": "Password.1!!"
+    },
+    "kaliadminUsername": {
+      "value": "kali"
+    },
+    "kaliadminPassword": {
+      "value": "kali"
+    },
+    "jumpvmadminUsername": {
+     "value": "Administrator"
+      },
+    "jumpvmadminPassword": {
+      "value": "Hacker2021!"
+      },
+    "ubuntuadminUsername": {
+      "value": "ubuntu"
+    },
+    "ubuntuadminPassword": {
+      "value": "ubuntu"
+    },
+    "UniqueID": {
+        "value": "Enter-Any-6-AlphaNumeraic-Values-Starting-With-An-Alphabet-In-LowerCase"
+      }
+
+  }
+}
