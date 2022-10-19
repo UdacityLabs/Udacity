@@ -112,3 +112,4 @@ DisableWindowsFirewall
 InstallEdgeChromium
 InstallAzPowerShellModule
 
+choco install openssh --pre
