@@ -136,7 +136,7 @@ choco install openssh --pre
 
 $userName = $AzureUserName
 $password = $AzurePassword
-$deploymentID = $DeploymentID
+
 
 $securePassword = $password | ConvertTo-SecureString -AsPlainText -Force
 $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $userName, $SecurePassword
@@ -144,8 +144,7 @@ $cred = new-object -typename System.Management.Automation.PSCredential -argument
 Connect-AzAccount -Credential $cred | Out-Null
 
 
-$rgName = "entp-02-" + $deploymentID
-$vmName = "labvm-" + $deploymentID
+$rgName = "entp-project2"
 
 Get-AzRemoteDesktopFile -ResourceGroupName "$rgName" -Name "$vmName" -LocalPath "C:\Users\Udacity-Student\Desktop\labvm.rdp"
 
