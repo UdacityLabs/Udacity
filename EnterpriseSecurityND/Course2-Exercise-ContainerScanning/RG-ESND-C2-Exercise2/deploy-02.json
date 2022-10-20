@@ -1,0 +1,354 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+
+    "kaliadminUsername": {
+      "type": "string"
+
+    },
+    "kaliadminPassword": {
+      "type": "securestring"
+
+    },
+    "ubuntuadminUsername": {
+      "type": "string"
+    },
+    "ubuntuadminPassword": {
+      "type": "securestring"
+    },
+    "UniqueID": {
+        "type": "string",
+        "metadata": {
+            "description": "Enter Any 6 AlphaNumeraic Values Starting With An Alphabet In LowerCase. Example: a14d6e"
+          }
+      }
+
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "addressPrefix": "10.0.0.0/24",
+    "subnetPrefix": "10.0.0.0/24",
+    "virtualMachineSize": "Standard_B2s",
+
+
+    "networkSecurityGroupNameLinux": "[concat('kali', '-nsg')]",
+    "networkSecurityGroupRulesLinux": [
+      {
+        "name": "SSH",
+        "properties": {
+          "priority": 300,
+          "protocol": "TCP",
+          "access": "Allow",
+          "direction": "Inbound",
+          "sourceAddressPrefix": "*",
+          "sourcePortRange": "*",
+          "destinationAddressPrefix": "*",
+          "destinationPortRange": "22"
+        }
+      }
+
+    ],
+    "publicIpAddressNameLinux": "[concat('kali-', 'ip')]",
+    "publicIpAddressNameubuntu": "[concat('ubuntu-', 'ip')]",
+    "publicIpAddressTypeLinux": "Static",
+    "publicIpAddressSkuLinux": "Basic",
+    "linuxvirtualNetworkName": "kali-vnet",
+    "ubuntuvirtualNetworkName": "ubuntu-vnet",
+    "networkSecurityGroupNameubuntu": "[concat('ubuntu', '-nsg')]",
+    "subnetName": "default",
+    "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('linuxvirtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+    "networkInterfaceNameLinux": "[concat('kali-', parameters('UniqueID'))]",
+    "networkInterfaceNameubuntu": "[concat('ubuntu-', parameters('UniqueID'))]",
+    "nsgIdLinux": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupNameLinux'))]",
+    "nsgIdubuntu": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupNameubuntu'))]",
+    "virtualMachineNameubuntu": "[concat('ubuntu-', parameters('UniqueID'))]",
+    "virtualMachineNameLinux": "[concat('kali-', parameters('UniqueID'))]",
+    "virtualMachineSizeLinux": "Standard_B2s",
+    "publicIpAddressDNSNameubuntu": "[concat('ubuntu', parameters('UniqueID'))]",
+    "publicIpAddressDNSNameLinux": "[concat('kali', parameters('UniqueID'))]"
+
+
+
+  },
+
+  "resources": [
+    {
+      "apiVersion": "2016-09-01",
+      "name": "pid-e843308b-3ce2-42a2-b743-2f21b36a5e68",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
+
+    {
+      "name": "[variables('networkSecurityGroupNameLinux')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": "[variables('networkSecurityGroupRulesLinux')]"
+      }
+    },
+    {
+      "name": "[variables('linuxvirtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('networkSecurityGroupNameLinux'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressNameLinux')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSNameLinux'))]"
+        }
+      },
+      "sku": {
+        "name": "[variables('publicIpAddressSkuLinux')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('networkInterfaceNameLinux')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupNameLinux'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('linuxvirtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNameLinux'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNameLinux'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgIdLinux')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineNameLinux')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNameLinux'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSizeLinux')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('virtualMachineNameLinux'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 127
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-kali-IMAGE-ID-HERE>"
+          }
+        },
+
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNameLinux'))]"
+            }
+          ]
+        }
+
+      }
+    },
+
+    {
+      "name": "[variables('networkSecurityGroupNameubuntu')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": "[variables('networkSecurityGroupRulesLinux')]"
+      }
+    },
+    {
+      "name": "[variables('ubuntuvirtualNetworkName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-08-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('networkSecurityGroupNameubuntu'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIpAddressNameubuntu')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[variables('publicIpAddressTypeLinux')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(variables('publicIpAddressDNSNameubuntu'))]"
+        }
+      },
+      "sku": {
+        "name": "[variables('publicIpAddressSkuLinux')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('networkInterfaceNameubuntu')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupNameubuntu'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('ubuntuvirtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNameubuntu'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNameubuntu'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgIdubuntu')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('virtualMachineNameubuntu')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNameubuntu'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSizeLinux')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "name": "[concat(variables('virtualMachineNameubuntu'), '-osdisk')]",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
+            "diskSizeGB": 512
+          },
+          "imageReference": {
+            "id": "<PASTE-THE-ubuntu-IMAGE-ID-HERE>"
+          }
+        },
+
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNameubuntu'))]"
+            }
+          ]
+        }
+
+      }
+    }
+
+  ],
+  "outputs": {
+
+    "kali username": {
+      "type": "string",
+      "value": "[parameters('kaliadminUsername')]"
+    },
+    "kali password": {
+      "type": "string",
+      "value": "[parameters('kaliadminPassword')]"
+    },
+    "Command to Connect to kali VM ": {
+      "type": "string",
+      "value": "[concat('ssh  kali@', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameLinux'))).ipAddress)]"
+    },
+    "ubuntu VM Username": {
+      "type": "string",
+      "value": "[parameters('ubuntuadminUsername')]"
+    },
+    "ubuntu VM Password": {
+      "type": "string",
+      "value": "[parameters('ubuntuadminPassword')]"
+    },
+    "Command to Connect to ubuntu VM ": {
+      "type": "string",
+      "value": "[concat('ssh  ubuntu@', reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameubuntu'))).ipAddress)]"
+    }
+
+
+  }
+}
+    
