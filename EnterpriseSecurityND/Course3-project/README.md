@@ -4,7 +4,7 @@
 
 1. Consider an alphanumeric string of 6 values starting with an alphabet in lowercase, that you need to use as **UniqueID** for the rest of the lab. For example: **a14d6e**.
 
-2. Create/Ddeploy all the resource groups and resources in the same region mentioned in the classroom instructions.
+2. Create/Ddeploy all the resource groups and resources in the region mentioned in the classroom instructions.
 
 3. Select the region only in the **Region** property. Do not make any modifications to **Location** property "[resourceGroup().location]". 
 
