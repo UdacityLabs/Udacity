@@ -1,4 +1,4 @@
-# Enterprise Security Nanodegree Exercise Course 2 Project
+# Enterprise Security Nanodegree Course 2 Project
 
 ## Before you start (Pre-requisites & Points to remember )
 
