@@ -31,7 +31,7 @@ Deploy the files to **jumpvm** resource group after providing the UniqueID value
 ### 2. Deploy to Resource Group: ESND-C2-Exercise2
 
 **a) Files to download:** <br/>
-Download the files "deploy-02.json" and "deploy-02.parameters.json" available in the path "Udacity/EnterpriseSecurityND/Course2-Exercise-ContainerScanning/RG-ESND-C3-Exercise2/".
+Download the files "deploy-02.json" and "deploy-02.parameters.json" available in the path "Udacity/EnterpriseSecurityND/Course2-Exercise-ContainerScanning/RG-ESND-C2-Exercise2/".
 
 **b) Create a resource group:** <br/>
 Create a resource group with name **ESND-C2-Exercise2**.
