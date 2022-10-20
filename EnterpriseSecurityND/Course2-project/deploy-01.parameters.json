@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "value": "Udacity-Student"
+    },
+    "adminPassword": {
+      "value": "UdacityRocks!"
+    },
+    "AzureUserName": {
+      "value": "ENTER-YOUR-AZURE-USERNAME"
+    },
+    "AzurePassword": {
+      "value": "ENTER-YOUR-AZURE-PASSWORD"
+    },
+    "UniqueID": {
+        "value": "Enter-Any-6-AlphaNumeraic-Values-Starting-With-An-Alphabet-In-LowerCase"
+      }
+
+  }
+}
