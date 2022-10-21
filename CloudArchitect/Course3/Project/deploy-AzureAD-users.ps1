@@ -1,18 +1,12 @@
-#Script to deploy Azure AD users
-Install-PackageProvider -Name NuGet -RequiredVersion 2.8.5.201 -Force
-Install-Module AzureAD -Force
+#Script to deploy Azure AD users through Powershell in Azure's Cloudshell
 
+#Replace <ENTER-YOUR-AZURE-USERNAME> with your Azure username and run the whole script in Powershell in Azure's Cloudshell
 $AzureUserName = "<ENTER-YOUR-AZURE-USERNAME>"
-$password = "<ENTER-YOUR-AZURE-PASSWORD>"
-$AzureSubscriptionID = "<ENTER-YOUR-AZURE-SUBSCRIPTION-ID>"
-$securePassword = $password | ConvertTo-SecureString -AsPlainText -Force
-$cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $userName, $SecurePassword
 
+#Note1: Copy and paste the script in Powershell in Azure's Cloudshell. It will take 2-5 minutes to create the users.
+#Note 2: Monitor the progress. When you see the user with name "Micheal", go to Active Directory and verify if users are created, since this is the last user that was created.
 
-Connect-AzureAD -Credential $cred | Out-Null
-
-
-Set-AzContext -SubscriptionId $AzureSubscriptionID
+Connect-AzureAD
 
 #creating azure ad users
 
@@ -67,7 +61,6 @@ New-AzureADUser -AccountEnabled $True -DisplayName "Igor" -PasswordProfile $Pass
 
 New-AzureADUser -AccountEnabled $True -DisplayName "Chris" -PasswordProfile $PasswordProfile -MailNickName "Chris" -UserPrincipalName "$Chris" -JobTitle "CIO" -Department "Executive Staff" -City "Charlotte"
 
-
 New-AzureADUser -AccountEnabled $True -DisplayName "Karl" -PasswordProfile $PasswordProfile -MailNickName "Karl" -UserPrincipalName "$Karl" -JobTitle "COO" -Department "Executive Staff" -City "Charlotte"
 
 New-AzureADUser -AccountEnabled $True -DisplayName "Garrett" -PasswordProfile $PasswordProfile -MailNickName "Garrett" -UserPrincipalName "$Garrett" -JobTitle "Driver" -Department "Service Management" -City "Remote"
@@ -85,7 +78,3 @@ New-AzureADUser -AccountEnabled $True -DisplayName "Seth" -PasswordProfile $Pass
 New-AzureADUser -AccountEnabled $True -DisplayName "Winifred" -PasswordProfile $PasswordProfile -MailNickName "Winifred" -UserPrincipalName "$Winifred" -JobTitle "Support Desk Manager" -Department "IT" -City "Charlotte"
 
 New-AzureADUser -AccountEnabled $True -DisplayName "Michael" -PasswordProfile $PasswordProfile -MailNickName "Michael" -UserPrincipalName "$Michael" -JobTitle "Support Desk Admin" -Department "IT" -City "Detroit"
-
-
-
-
